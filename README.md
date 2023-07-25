@@ -7,7 +7,7 @@ Submits pacman packages installed on a machine.
 Submits the following:
 
 * List of pacakges (`pacman -Qq`)
-* General information about the OS, architecture etc.
+* General information about the OS, Architecture, Kernel etc.
 * A unique identifier of the machine
 
 This data is submitted to a Server in the EU and abides by [GDPR](https://en.wikipedia.org/wiki/General_Data_Protection_Regulation) regulations. 

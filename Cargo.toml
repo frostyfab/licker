@@ -14,6 +14,7 @@ machineid-rs = "1.2.3"
 reqwest = { version = "0.11.18", features = ["blocking", "json"] }
 serde = "1.0.173"
 serde_json = "1.0.103"
+whoami = "1.4.1"
 
 [dev-dependencies]
 assert_matches = "1.5.0"

@@ -26,21 +26,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hw_id = hw::id();
     let pacman_packages = pacman::packages();
     let os_info = os::info();
-    let os_distro = os::distro();
     let package_manager = String::from("pacman");
     let app_info = app::info();
 
     if config.verbose {
-        let packages: Vec<String> = pacman_packages.iter().map(|package| package.to_string()).collect();
+        let packages: Vec<String> = pacman_packages
+            .iter()
+            .map(|package| package.to_string())
+            .collect();
         let packages_out = packages.join(", ");
         println!("{}", packages_out);
 
         if let Ok(info) = os_info.as_ref() {
             println!("{:?}", info);
-        }
-
-        if let Ok(distro) = os_distro.as_ref() {
-            println!("Distribution: {}", distro);
         }
 
         if let Ok(id) = hw_id.as_ref() {
@@ -55,7 +53,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if config.submit {
         let payload = Payload {
             hw_id: hw_id.ok(),
-            distro: os_distro.ok(),
             package_manager,
             os: os_info.ok(),
             package_list: pacman_packages,
@@ -80,7 +77,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[serde(rename_all = "camelCase")]
 struct Payload {
     hw_id: Option<String>,
-    distro: Option<String>,
     package_manager: String,
     #[serde(flatten)]
     os: Option<OsInfo>,
@@ -88,15 +84,20 @@ struct Payload {
 }
 
 /// Submit the packagelist & metadata
-fn submit(payload: &Payload, app_info: &AppInfo, url: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn submit(
+    payload: &Payload,
+    app_info: &AppInfo,
+    url: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::blocking::Client::new();
 
-
-    let response = client.post(url)
-    .header("API-Version", "0.1")
-    .header("AppName", app_info.detect_app.to_string())
-    .header("AppVersion", app_info.detect_version.to_string())
-    .json(payload).send()?;
+    let response = client
+        .post(url)
+        .header("API-Version", "0.1")
+        .header("AppName", app_info.detect_app.to_string())
+        .header("AppVersion", app_info.detect_version.to_string())
+        .json(payload)
+        .send()?;
 
     match response.status() {
         reqwest::StatusCode::CREATED | reqwest::StatusCode::OK => Ok(()),
@@ -128,14 +129,14 @@ mod tests {
 
         let payload = Payload {
             hw_id: Some(hw_id.to_string()),
-            distro: Some(distro.to_string()),
             package_manager: package_manager.to_string(),
             os: Some(OsInfo {
                 os: os.to_string(),
                 kernel: kernel.to_string(),
                 arch: arch.to_string(),
+                distro: distro.to_string(),
             }),
-            package_list: package_list.clone()
+            package_list: package_list.clone(),
         };
 
         // Serialize/Deserialize JSON
